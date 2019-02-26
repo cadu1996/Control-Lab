@@ -4,6 +4,9 @@ import ConfigParser
 import os
 
 
+
+
+
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -15,8 +18,6 @@ class MainWindow(QtGui.QMainWindow):
         self.move(0, 0)
 
         self.system = []
-
-        self.initialize()
 
 
     def initialize(self):

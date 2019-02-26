@@ -14,8 +14,6 @@ class SelectSequence(QtGui.QMainWindow):
         self.name_sequence = ''
 
 
-        self.buildMainWindow()
-
     def buildMainWindow(self):
         self.setWindowIcon(QtGui.QIcon("laser.png"))
         self.setWindowTitle("Select Sequence")

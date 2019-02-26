@@ -20,7 +20,7 @@ class AutoRun(QtCore.QThread):
 
     def date_system(self):
         system = []
-        arq = open('system.txt', 'r')
+        arq = open('data/system.txt', 'r')
         texto = arq.readlines()
         for linha in texto:
             system.append(linha.split('\t'))

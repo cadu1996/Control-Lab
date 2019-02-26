@@ -177,6 +177,7 @@ class MainWindow(QtGui.QMainWindow):
         # List of files
         self.layout()
         self.initialization()
+        self.verifying_that_the_system_ini_exists()
 
     def layout(self):
         wid = QtGui.QWidget(self)
@@ -280,8 +281,10 @@ class MainWindow(QtGui.QMainWindow):
         sys.exit()
 
     def writeParameters(self):
-
-        if 'Parameters' not in os.listdir('data/'):
+        if 'data' not in os.listdir('.'):
+            os.mkdir('data')
+            os.mkdir('data/Parameters')
+        elif 'Parameters' not in os.listdir('data/'):
             os.mkdir('data/Parameters')
         else:
             pass
@@ -370,13 +373,17 @@ class MainWindow(QtGui.QMainWindow):
 
 
         self.setWindowTitle("Control - {0}".format(self.text_save.text()))
+        self.name_sequence_save()
+
 
     def select_sequence(self):
         self.child_window = sequence.SelectSequence(self)
+        self.child_window.buildMainWindow()
         self.child_window.show()
 
     def open_system_window(self):
         self.child_window_system = system.MainWindow(self)
+        self.child_window_system.initialize()
         self.child_window_system.show()
 
     def run_sequence(self):
@@ -476,6 +483,11 @@ class MainWindow(QtGui.QMainWindow):
         else:
             pass
 
+    def name_sequence_save(self):
+        self.name_file = str(self.text_save.text()) + '.ini'
+        n = len(self.name_file) - 4
+        self.write_settings(self.name_file[0:len(self.name_file) - 4])
+
     def name_sequence(self):
         n = len(self.name_file) - 4
         self.text_save.setText(self.name_file[0:n])
@@ -574,41 +586,44 @@ class MainWindow(QtGui.QMainWindow):
             config.read('data/Parameters/%s.ini' % name)
             section = config.sections()
 
-            # build table
-            j = int(config.get('%s' % (section[0]), 'nchannel'))
-            i = int(config.get('%s' % (section[0]), 'nprocess'))
-            self.table.setRowCount(i + 1)
-            self.table.setColumnCount(j + 3)
-            self.table.setItem(0, 0, QtGui.QTableWidgetItem('Process'))
-            self.table.setItem(0, 1, QtGui.QTableWidgetItem('Duration(ms)'))
-            self.text_timestep.setText(config.get('table size', 'timestep(us)'))
-            for i in range(i + 1):
-                self.table_item = QtGui.QTableWidgetItem()
-                self.table_item.setFlags(QtCore.Qt.ItemIsEditable)
-                self.table.setItem(i, 2, self.table_item)
-                self.table.item(i, 2).setBackground(QtGui.QColor(0, 0, 0))
-            for n in range(j + 3):
-                self.name_channels.append('')
-            self.table.setHorizontalHeaderLabels(self.name_channels)
+            try:
+                # build table
+                j = int(config.get('%s' % (section[0]), 'nchannel'))
+                i = int(config.get('%s' % (section[0]), 'nprocess'))
+                self.table.setRowCount(i + 1)
+                self.table.setColumnCount(j + 3)
+                self.table.setItem(0, 0, QtGui.QTableWidgetItem('Process'))
+                self.table.setItem(0, 1, QtGui.QTableWidgetItem('Duration(ms)'))
+                self.text_timestep.setText(config.get('table size', 'timestep(us)'))
+                for i in range(i + 1):
+                    self.table_item = QtGui.QTableWidgetItem()
+                    self.table_item.setFlags(QtCore.Qt.ItemIsEditable)
+                    self.table.setItem(i, 2, self.table_item)
+                    self.table.item(i, 2).setBackground(QtGui.QColor(0, 0, 0))
+                for n in range(j + 3):
+                    self.name_channels.append('')
+                self.table.setHorizontalHeaderLabels(self.name_channels)
 
-            for m in range(i + 1):
-                self.name_process.append('')
-            self.table.setVerticalHeaderLabels(self.name_process)
+                for m in range(i + 1):
+                    self.name_process.append('')
+                self.table.setVerticalHeaderLabels(self.name_process)
 
-            # get channels
-            for p in range(1, i + 1):
-                # get Durations
-                self.table.setItem(p, 1,
-                                   QtGui.QTableWidgetItem(config.get('Process {0}'.format(p), 'duration(ms)')))
-                for q in range(3, j + 3):
-                    # get channels
-                    self.table.setItem(p, q, QtGui.QTableWidgetItem(config.get('Process %i' % (p),
-                                                                               'channel AO %i value' % (q - 3))))
+                # get channels
+                for p in range(1, i + 1):
+                    # get Durations
+                    self.table.setItem(p, 1,
+                                       QtGui.QTableWidgetItem(config.get('Process {0}'.format(p), 'duration(ms)')))
+                    for q in range(3, j + 3):
+                        # get channels
+                        self.table.setItem(p, q, QtGui.QTableWidgetItem(config.get('Process %i' % (p),
+                                                                                   'channel AO %i value' % (q - 3))))
 
-                    # name of channels and process
-                    self.table.setItem(p, 0, QtGui.QTableWidgetItem(config.get('Process {0}'.format(p), 'name')))
-                    self.table.setItem(0, q, QtGui.QTableWidgetItem(
-                        config.get('channels', 'channel AO {0}'.format(q - 3))))
+                        # name of channels and process
+                        self.table.setItem(p, 0, QtGui.QTableWidgetItem(config.get('Process {0}'.format(p), 'name')))
+                        self.table.setItem(0, q, QtGui.QTableWidgetItem(
+                            config.get('channels', 'channel AO {0}'.format(q - 3))))
+            except IndexError:
+                pass
         else:
             pass
 
@@ -649,6 +664,29 @@ class MainWindow(QtGui.QMainWindow):
                                             "One of the channels was not defined in the system:"
                                             " View >> system window (Ctrl + W)",
                                             QtGui.QMessageBox.Ok)
+
+    def verifying_that_the_system_ini_exists(self):
+        if 'data' not in os.listdir('.'):
+            os.mkdir('data')
+
+            arq = open('data/system.txt', 'a')
+            write = []
+
+            for i in range(32):
+                write.append('AO6723/ao{0}\tChannel AO {0}\tAnalog\tyes\t5\n'.format(i))
+            arq.writelines(write)
+            arq.close()
+
+        elif 'system.ini' not in os.listdir('data/'):
+            arq = open('data/system.txt', 'a')
+            write = []
+
+            for i in range(32):
+                write.append('AO6723/ao{0}\tChannel AO {0}\tAnalog\tyes\t5\n'.format(i))
+            arq.writelines(write)
+            arq.close()
+        else:
+            pass
 
 def main():
     app_1 = QtGui.QApplication(sys.argv)
