@@ -32,22 +32,6 @@ class MainWindow(QtGui.QMainWindow):
                 write.append('AO6723/ao{0}\tChannel AO {0}\tAnalog\tyes\t5\n'.format(i))
             arq.writelines(write)
             arq.close()
-            # self.system = []
-            # for i in range(32):
-            #     self.system.append([])
-            #     for j in range(5):
-            #         if j == 0:
-            #             self.system[i].append('AO6723/ao{0}\t'.format(i))
-            #         elif j == 1:
-            #             self.system[i].append('Channel AO {0}\t'.format(i))
-            #         elif j == 2:
-            #             self.system[i].append('Analog\t')
-            #         elif j == 3:
-            #             self.system[i].append('yes\t')
-            #         elif j == 4:
-            #             self.system[i].append('5')
-
-
 
             self.read()
 
