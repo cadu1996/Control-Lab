@@ -119,6 +119,7 @@ class MainWindow(QtGui.QMainWindow):
         self.text_save.setFixedWidth(150)
 
         self.text_timestep = QtGui.QLineEdit()
+        self.text_timestep.setText('10')
         self.text_timestep.setFixedWidth(50)
 
         # label
@@ -138,7 +139,7 @@ class MainWindow(QtGui.QMainWindow):
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(['', '', '', ''])
 
-        self.table.setItem(0, 0, QtGui.QTableWidgetItem('Process'))
+        self.table.setItem(0, 0, QtGui.QTableWidgetItem('Processes'))
         self.table.setItem(0, 1, QtGui.QTableWidgetItem('Duration(ms)'))
         self.table.setItem(0, 3, QtGui.QTableWidgetItem('Channel AO 0'))
         self.table.setItem(1, 0, QtGui.QTableWidgetItem('Process 1'))
@@ -178,6 +179,8 @@ class MainWindow(QtGui.QMainWindow):
         self.layout()
         self.initialization()
         self.verifying_that_the_system_ini_exists()
+        self.window
+
 
     def layout(self):
         wid = QtGui.QWidget(self)
@@ -186,24 +189,25 @@ class MainWindow(QtGui.QMainWindow):
         self.grid_layout.setSpacing(10)
 
         # Tables
-        self.grid_layout.addWidget(self.table, 2, 0, 2, 4)
+        self.grid_layout.addWidget(self.table, 2, 0, 4, 4)
 
         # Buttons
-        self.grid_layout.addWidget(self.btn_addProcess, 4, 0)
-        self.grid_layout.addWidget(self.btn_addChannel, 4, 1)
-        self.grid_layout.addWidget(self.btn_Save, 6, 2)
+        self.grid_layout.addWidget(self.btn_addProcess, 7, 0, 1, 1)
+        self.grid_layout.addWidget(self.btn_addChannel, 7, 1, 1, 1)
+        self.grid_layout.addWidget(self.btn_Save, 9, 2, 1, 1)
 
-        self.grid_layout.addWidget(self.btn_removeProcess, 5, 0)
-        self.grid_layout.addWidget(self.btn_removeChannel, 5, 1)
-        self.grid_layout.addWidget(self.btn_run, 2, 4)
-        self.grid_layout.addWidget(self.btn_autorun, 3, 4)
+        self.grid_layout.addWidget(self.btn_removeProcess, 8, 0, 1, 1)
+        self.grid_layout.addWidget(self.btn_removeChannel, 8, 1, 1, 1)
+        self.grid_layout.addWidget(self.btn_run, 2, 4, 1, 1)
+        self.grid_layout.addWidget(self.btn_autorun, 4, 4, 1, 1)
 
         # LineEdit
-        self.grid_layout.addWidget(self.text_save, 6, 1)
+        self.grid_layout.addWidget(self.text_save, 9, 1, 1, 1)
         self.grid_layout.addWidget(self.text_timestep, 1, 0)
 
         # label
-        self.grid_layout.addWidget(self.label_save, 6, 0)
+        self.grid_layout.addWidget(self.label_save, 9, 0, 1, 1)
+        self.label_save.setAlignment(QtCore.Qt.AlignRight)
         self.grid_layout.addWidget(self.label_timestep, 0, 0)
         self.grid_layout.addWidget(self.label_name_sequence, 1, 1)
 
@@ -302,11 +306,13 @@ class MainWindow(QtGui.QMainWindow):
 
                         config.add_section("channels")
                         for n in range(j - 3):
-                            config.set('channels', 'Channel AO {0}'.format(n), '{0}'.format(self.table.item(0, 3 + n).text()))
+                            config.set('channels', 'Channel AO {0}'.format(n),
+                                       '{0}'.format(self.table.item(0, 3 + n).text()))
 
                         for m in range(i - 1):
                             config.add_section('Process {0}'.format(m + 1))
-                            config.set('Process {0}'.format(m + 1), 'name', '{0}'.format(self.table.item(m + 1, 0).text()))
+                            config.set('Process {0}'.format(m + 1), 'name',
+                                       '{0}'.format(self.table.item(m + 1, 0).text()))
                             config.set('Process {0}'.format(m + 1), 'Duration(ms)',
                                        '{0}'.format(self.table.item(m + 1, 1).text()))
                             for p in range(j - 3):
@@ -341,7 +347,8 @@ class MainWindow(QtGui.QMainWindow):
 
                             for m in range(i - 1):
                                 config.add_section('Process {0}'.format(m + 1))
-                                config.set('Process {0}'.format(m + 1), 'name', '{0}'.format(self.table.item(m + 1, 0).text()))
+                                config.set('Process {0}'.format(m + 1), 'name',
+                                           '{0}'.format(self.table.item(m + 1, 0).text()))
                                 config.set('Process {0}'.format(m + 1), 'Duration(ms)',
                                            '{0}'.format(self.table.item(m + 1, 1).text()))
                                 for p in range(j - 3):
@@ -370,11 +377,8 @@ class MainWindow(QtGui.QMainWindow):
                                                 " sure Timestep has only numbers",
                                                 QtGui.QMessageBox.Ok)
 
-
-
         self.setWindowTitle("Control - {0}".format(self.text_save.text()))
         self.name_sequence_save()
-
 
     def select_sequence(self):
         self.child_window = sequence.SelectSequence(self)
@@ -395,7 +399,7 @@ class MainWindow(QtGui.QMainWindow):
         sleep(1)
         if self.validation == True:
 
-            #self.child_run_sequence.wait_time()
+            # self.child_run_sequence.wait_time()
             self.child_run_sequence.write_number()
             self.shot_number()
 
@@ -677,7 +681,7 @@ class MainWindow(QtGui.QMainWindow):
             arq.writelines(write)
             arq.close()
 
-        elif 'system.ini' not in os.listdir('data/'):
+        elif 'system.txt' not in os.listdir('data/'):
             arq = open('data/system.txt', 'a')
             write = []
 
@@ -687,6 +691,7 @@ class MainWindow(QtGui.QMainWindow):
             arq.close()
         else:
             pass
+
 
 def main():
     app_1 = QtGui.QApplication(sys.argv)
